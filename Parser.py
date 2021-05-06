@@ -1,5 +1,5 @@
-import requests
 from bs4 import BeautifulSoup
+import requests
 import sqlite3
 
 URL = 'https://interfax.ru'
@@ -7,6 +7,7 @@ NEED_UPD_FLAG = 1
 NO_UPD_FLAG = 0
 NEED_CREATE_FLAG = 2
 NULL_TIME = None
+MAX_PAGE_NUMBER = 10
 
 
 def parse_stories():
@@ -14,14 +15,13 @@ def parse_stories():
     response = requests.get(URL + '/story/')
     soup = BeautifulSoup(response.text, 'lxml')
 
-    items = soup.find('div', class_='newsmain')
     page_board = soup.find('div', class_='allPNav')
     pages = page_board.find_all('a')
     last_page = pages[len(pages) - 1]['href'][12:]
-    itr = 0
+    iteration = 0
     for page in range(1, int(last_page) + 1):
         # Парсинг 10 первых страниц
-        if itr == 10:
+        if iteration == MAX_PAGE_NUMBER:
             break
         cur_url = URL + '/story/page_' + str(page)
         response = requests.get(cur_url)
@@ -42,26 +42,28 @@ def parse_stories():
                         upd_time_dict[name][1] = NEED_UPD_FLAG
                         upd_time_dict[name][2] = parse_topics(link, time)
 
-
                     else:
                         pass
                 else:
                     pass
                     upd_time_dict[name] = [str(time), NEED_CREATE_FLAG, parse_topics(link, NULL_TIME), link]
-        itr += 1
+        iteration += 1
 
     update_db(upd_time_dict)
     return
 
 
 def update_db(update_dict):
+    # Обновление базы данных
     with sqlite3.connect('User.db') as conn:
         cur = conn.cursor()
         cur.execute(
             """CREATE TABLE IF NOT EXISTS topics(topic_name PRIMARY KEY,upd_time TEXT,stories TEXT,link TEXT )""")
         for key in update_dict.keys():
+            # Если данные в базе не устарели - переход на следующую итерацию
             if update_dict[key][1] == NO_UPD_FLAG:
                 continue
+            # Если в присутствующий в базе раздел новостей добавлены новые статьи
             elif update_dict[key][1] == NEED_UPD_FLAG:
                 for i in cur.execute(f"SELECT stories FROM topics WHERE topic_name = '{key}'"):
                     substr = i[0]
@@ -69,7 +71,7 @@ def update_db(update_dict):
                     f"UPDATE topics SET stories = {substr + update_dict[key][2]}")
                 cur.execute(
                     f"UPDATE topics SET upd_time = {substr + update_dict[key][0]}")
-
+            # Если добавлен новый раздец
             else:
                 cur.execute(f"INSERT INTO topics VALUES (?,?,?,?)",
                             (key, update_dict[key][0], update_dict[key][2], update_dict[key][3]))
@@ -108,6 +110,7 @@ def parse_page(link, page):
 
 
 def create_upd_dict():
+    # Создание словаря с изменениями
     update_time = dict()
     with sqlite3.connect('User.db') as conn:
         cur = conn.cursor()
@@ -119,4 +122,3 @@ def create_upd_dict():
         for topic in cur.execute("SELECT topic_name,upd_time FROM topics"):
             update_time[topic[0]] = [topic[1], NO_UPD_FLAG, '', '']
         return update_time
-

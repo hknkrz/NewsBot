@@ -1,43 +1,45 @@
+from Parser import parse_stories
+from SendMessage import new_docs, new_topics, topic, describe_doc, words, get_tags
 import telebot
 from telebot.util import async_dec
 import time
 
-from Parser import parse_stories
-from SendMessage import new_docs, new_topics, topic, describe_doc, words, get_tags
+DB_UPDATE_TIME = 160.0
 
 bot = telebot.TeleBot('1786516962:AAHcmmfEn060vldOLtA_B5lYZZM-hs82UyE')
 
-command_dict = {"/new_docs": new_docs, "/new_topics": new_topics, "/topic": topic, "/describe_doc": describe_doc,
-                "/get_tags": get_tags, "/words": words}
+command_dict = {'/new_docs': new_docs, '/new_topics': new_topics, '/topic': topic, '/describe_doc': describe_doc,
+                '/get_tags': get_tags, '/words': words}
 
 
 @async_dec()
 def re_parse():
+    # Функция, регулярно парсящая новостной сайт
     starttime = time.time()
     while True:
         parse_stories()
-        time.sleep(150.0 - ((time.time() - starttime) % 150.0))
+        time.sleep(DB_UPDATE_TIME - ((time.time() - starttime) % DB_UPDATE_TIME))
 
 
-@bot.message_handler(content_types=["text"])
+@bot.message_handler(content_types=['text'])
 def get_text_messages(message):
-    command = message.text.split()
+    command = message.text.split(' ', 1)
     if command[0] == '/help':
-        bot.send_message(message.from_user.id, "/new_docs <N> - показать N самых свежих новостей")
-        bot.send_message(message.from_user.id, "/new_topics <N> - показать N самых свежих тем")
+        bot.send_message(message.from_user.id, '/new_docs <N> - показать N самых свежих новостей')
+        bot.send_message(message.from_user.id, '/new_topics <N> - показать N самых свежих тем')
         bot.send_message(message.from_user.id,
-                         "/topic <topic_name> - показать описание темы и заголовки 5 самых свежих новостей в этой теме")
+                         '/topic <topic_name> - показать описание темы и заголовки 5 самых свежих новостей в этой теме')
         bot.send_message(message.from_user.id,
-                         "/describe_doc <link> - показать частоту слов и распределение слов по длинам")
-        bot.send_message(message.from_user.id, "/get_tags <link> - показать теги статьи")
-        bot.send_message(message.from_user.id, "/words <link> - показать ключевые слова к статье")
-
+                         '/describe_doc <link> - показать частоту слов и распределение слов по длинам')
+        bot.send_message(message.from_user.id, '/get_tags <link> - показать теги статьи')
+        bot.send_message(message.from_user.id, '/words <link> - показать ключевые слова к статье')
 
     elif command[0] in command_dict.keys():
-        if len(command) < 2:
+        if len(command) != 2:
             bot.send_message(message.from_user.id,
-                             "Invalid arguments\n write /help to get a information about arguments for function" +
+                             'Invalid arguments\n write /help to get a information about arguments for function' +
                              command[0])
+            raise Exception('Excepted 1 argument')
         else:
 
             args = command[1:]
@@ -47,7 +49,8 @@ def get_text_messages(message):
                 message_to_usr += str(element) + ':\n' + str(result[element]) + '\n'
             bot.send_message(message.from_user.id, message_to_usr)
     else:
-        bot.send_message(message.from_user.id, "Invalid function\n write /help to get a list of possible functions")
+        bot.send_message(message.from_user.id, 'Invalid function\n write /help to get a list of possible functions')
+        raise Exception('Invalid function')
 
 
 re_parse()

@@ -1,13 +1,16 @@
+from bs4 import BeautifulSoup
 import collections
 import requests
-from bs4 import BeautifulSoup
+
+FIRST_40_WORDS = 40
 
 
 def word_counter(link):
+    # Частотный анализ текста
     tag_str = ''
     word_dict = collections.Counter()
-
     response = requests.get(link)
+
     soup = BeautifulSoup(response.content.decode('windows-1251', 'ignore'), 'lxml')
     text = soup.find('article', itemprop='articleBody')
     header = soup.find('h1', itemprop='headline').get_text()
@@ -24,6 +27,7 @@ def word_counter(link):
 
 
 def len_counter(word_dict):
+    # Распределение слов по длинам
     len_dict = collections.Counter()
     for key in word_dict.keys():
         len_dict[len(key)] += word_dict[key]
@@ -31,8 +35,9 @@ def len_counter(word_dict):
 
 
 def popular_words(word_dict):
+    # Ключевые слова статьи
     words = []
-    for key in word_dict.most_common(40):
+    for key in word_dict.most_common(FIRST_40_WORDS):
         if len(words) > 3:
             break
         if len(key[0]) > 5:
