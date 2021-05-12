@@ -73,7 +73,7 @@ def update_db(update_dict):
                     f"UPDATE topics SET upd_time = {substr + update_dict[key][0]}")
             # Если добавлен новый раздец
             else:
-                cur.execute(f"INSERT INTO topics VALUES (?,?,?,?)",
+                cur.execute("INSERT INTO topics VALUES (?,?,?,?)",
                             (key, update_dict[key][0], update_dict[key][2], update_dict[key][3]))
 
                 pass

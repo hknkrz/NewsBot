@@ -15,7 +15,7 @@ def new_docs(quantity):
         cur = conn.cursor()
         iteration = 0
         result = dict()
-        for element in cur.execute(f"SELECT topic_name,stories FROM topics ORDER BY upd_time DESC"):
+        for element in cur.execute("SELECT topic_name,stories FROM topics ORDER BY upd_time DESC"):
             if iteration >= int(quantity):
                 break
             result[element[0]] = element[1].split('\n')[-1]
@@ -31,7 +31,7 @@ def new_topics(quantity):
         cur = conn.cursor()
         iteration = 0
         result = dict()
-        for element in cur.execute(f"SELECT topic_name,link FROM topics ORDER BY upd_time DESC"):
+        for element in cur.execute("SELECT topic_name,link FROM topics ORDER BY upd_time DESC"):
             if iteration >= int(quantity):
                 break
             result[element[0]] = URL + element[1]
