@@ -21,7 +21,8 @@ def re_parse():
         time.sleep(DB_UPDATE_TIME - ((time.time() - starttime) % DB_UPDATE_TIME))
 
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(content_types=['text'],
+                     commands=['/new_docs', '/new_topics', '/topic', '/describe_doc', '/get_tags', '/words'])
 def get_text_messages(message):
     command = message.text.split(' ', 1)
     if command[0] == '/help':
