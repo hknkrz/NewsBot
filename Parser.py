@@ -18,10 +18,9 @@ def parse_stories():
     page_board = soup.find('div', class_='allPNav')
     pages = page_board.find_all('a')
     last_page = pages[len(pages) - 1]['href'][12:]
-    iteration = 0
     for page in range(1, int(last_page) + 1):
         # Парсинг 10 первых страниц
-        if iteration == MAX_PAGE_NUMBER:
+        if page == MAX_PAGE_NUMBER:
             break
         cur_url = URL + '/story/page_' + str(page)
         response = requests.get(cur_url)
@@ -42,10 +41,6 @@ def parse_stories():
                         upd_time_dict[name][1] = NEED_UPD_FLAG
                         upd_time_dict[name][2] = parse_topics(link, time)
 
-                    else:
-                        pass
-                else:
-                    pass
                     upd_time_dict[name] = [str(time), NEED_CREATE_FLAG, parse_topics(link, NULL_TIME), link]
         iteration += 1
 

@@ -6,7 +6,7 @@ import time
 
 DB_UPDATE_TIME = 160.0
 
-bot = telebot.TeleBot('1786516962:AAHcmmfEn060vldOLtA_B5lYZZM-hs82UyE')
+bot = telebot.TeleBot('<YourToken>')
 
 command_dict = {'/new_docs': new_docs, '/new_topics': new_topics, '/topic': topic, '/describe_doc': describe_doc,
                 '/get_tags': get_tags, '/words': words}
