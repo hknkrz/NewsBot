@@ -42,7 +42,6 @@ def parse_stories():
                         upd_time_dict[name][2] = parse_topics(link, time)
 
                     upd_time_dict[name] = [str(time), NEED_CREATE_FLAG, parse_topics(link, NULL_TIME), link]
-        iteration += 1
 
     update_db(upd_time_dict)
     return
