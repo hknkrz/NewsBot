@@ -3,12 +3,13 @@ import collections
 import requests
 
 FIRST_40_WORDS = 40
+SHORT_WORD = 3
+KEY_WORD_QUANTITY = 5
 
 
 def word_counter(link):
-    # Частотный анализ текста
+    """Принимает ссылку на статью, проводит частотный анализ текста"""
     tag_str = ''
-    word_dict = collections.Counter()
     response = requests.get(link)
 
     soup = BeautifulSoup(response.content.decode('windows-1251', 'ignore'), 'lxml')
@@ -18,28 +19,31 @@ def word_counter(link):
     for tag in tag_bar.find_all('a'):
         tag_str += tag.get_text() + '\n'
 
+    all_text = ''
     for element in text.find_all('p'):
-        for word in element.get_text().split():
-            word_dict[word] += 1
+        all_text += ' ' + element.get_text()
+    word_dict = collections.Counter(all_text.split())
     len_dict = len_counter(word_dict)
     words = popular_words(word_dict)
     return word_dict, len_dict, tag_str, header, words
 
 
 def len_counter(word_dict):
-    # Распределение слов по длинам
-    len_dict = collections.Counter()
-    for key in word_dict.keys():
-        len_dict[len(key)] += word_dict[key]
+    """Принимает словарь с частотами слов, строит частотный словарь слов по их длнам"""
+    len_dict = {len(x): sum([word_dict[y] if len(y) == len(x) else 0 for y in word_dict.keys()]) for x in
+                word_dict.keys()}
     return len_dict
 
 
 def popular_words(word_dict):
-    # Ключевые слова статьи
+    """Принимает словарь с частотами слов, ищет вероятные ключевые слова"""
     words = []
     for key in word_dict.most_common(FIRST_40_WORDS):
-        if len(words) > 3:
+        if len(words) > SHORT_WORD:
             break
-        if len(key[0]) > 5:
+        if len(key[0]) > KEY_WORD_QUANTITY:
             words.append(key[0])
     return '\n'.join(words)
+
+
+word_counter('https://www.interfax.ru/moscow/767986')

@@ -14,7 +14,7 @@ command_dict = {'/new_docs': new_docs, '/new_topics': new_topics, '/topic': topi
 
 @async_dec()
 def re_parse():
-    # Функция, регулярно парсящая новостной сайт
+    """Функция, регулярно парсящая новостной сайт"""
     starttime = time.time()
     while True:
         parse_stories()
@@ -46,7 +46,7 @@ def get_text_messages(message):
             result = command_dict[command[0]](*args)
             message_to_usr = ''
             for element in result.keys():
-                message_to_usr += str(element) + ':\n' + str(result[element]) + '\n'
+                '\n'.join(f"{message_to_usr}{str(element)}{str(result[element])}")
             bot.send_message(message.from_user.id, message_to_usr)
     else:
         bot.send_message(message.from_user.id, 'Invalid function\n write /help to get a list of possible functions')

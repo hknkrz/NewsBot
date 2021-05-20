@@ -7,9 +7,9 @@ KEY_WORD_QUANTITY = 4
 
 
 def new_docs(quantity):
+    """Вернуть <quantity> свежих новостей"""
     if not quantity.isnumeric():
         raise Exception('Excepted integer value')
-    # Отправить quantity свежих новостей
     with sqlite3.connect('User.db') as conn:
         cur = conn.cursor()
         result = {}
@@ -21,7 +21,7 @@ def new_docs(quantity):
 
 
 def new_topics(quantity):
-    # Отправить quantity актуальных разделов
+    """Вернуть <quantity> актуальных разделов"""
     if not quantity.isnumeric():
         raise Exception('Excepted integer value')
     with sqlite3.connect('User.db') as conn:
@@ -35,7 +35,7 @@ def new_topics(quantity):
 
 
 def topic(name):
-    # Отправить 5 свежих новостей из раздела name
+    """Вернуть 5 свежих новостей из раздела name"""
     with sqlite3.connect('User.db') as conn:
         cur = conn.cursor()
         result = {}
@@ -49,30 +49,30 @@ def topic(name):
 
 
 def describe_doc(link):
+    """Вернуть статистику по статье"""
     try:
         requests.get(link)
     except Exception:
         raise Exception('Excepted correct link')
-    # Отправить статистику по статье
     info = word_counter(link)
     return {**info[0], **info[1]}
 
 
 def get_tags(link):
+    """Вернуть теги статьи"""
     try:
         requests.get(link)
     except Exception:
         raise Exception('Excepted correct link')
-    # Отправить теги статьи
     info = word_counter(link)
     return {info[3]: info[2]}
 
 
 def words(link):
+    """Вернуть ключевые слова статьи"""
     try:
         requests.get(link)
     except Exception:
         raise Exception('Excepted correct link')
-    # Отправить ключевые слова статьи
     info = word_counter(link)
     return {'Возможные ключевые слова': info[KEY_WORD_QUANTITY]}
