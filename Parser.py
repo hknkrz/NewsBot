@@ -3,9 +3,7 @@ import requests
 import sqlite3
 
 URL = 'https://interfax.ru'
-TOPIC_IS_NOT_ACTUAL = 1
-TOPIC_IS_ACTUAL = 0
-ADD_NEW_TOPIC = 2
+TOPIC_STATUS = (0, 1, 2)
 NULL_TIME = None
 MAX_PAGE_NUMBER = 10
 LINK_PREFIX_LEN = 12
@@ -42,10 +40,10 @@ def parse_stories():
                 if name in upd_time_dict.keys():
                     if upd_time_dict[name][0] != str(time):
                         upd_time_dict[name][0] = str(time)
-                        upd_time_dict[name][1] = TOPIC_IS_NOT_ACTUAL
+                        upd_time_dict[name][1] = TOPIC_STATUS[1]
                         upd_time_dict[name][2] = parse_topics(link, time)
 
-                    upd_time_dict[name] = [str(time), ADD_NEW_TOPIC, parse_topics(link, NULL_TIME), link]
+                    upd_time_dict[name] = [str(time), TOPIC_STATUS[2], parse_topics(link, NULL_TIME), link]
 
     update_db(upd_time_dict)
     return
@@ -59,10 +57,10 @@ def update_db(update_dict):
             """CREATE TABLE IF NOT EXISTS topics(topic_name PRIMARY KEY,upd_time TEXT,stories TEXT,link TEXT )""")
         for key in update_dict.keys():
             # Если данные в базе не устарели - переход на следующую итерацию
-            if update_dict[key][1] == TOPIC_IS_ACTUAL:
+            if update_dict[key][1] == TOPIC_STATUS[0]:
                 continue
             # Если в присутствующий в базе раздел новостей добавлены новые статьи
-            elif update_dict[key][1] == TOPIC_IS_NOT_ACTUAL:
+            elif update_dict[key][1] == TOPIC_STATUS[1]:
                 for i in cur.execute(f"SELECT stories FROM topics WHERE topic_name = '{key}'"):
                     substr = i[0]
                 cur.execute(
@@ -122,5 +120,5 @@ def create_upd_dict():
         conn.commit()
 
         for topic in cur.execute("SELECT topic_name,upd_time FROM topics"):
-            update_time[topic[0]] = [topic[1], TOPIC_IS_ACTUAL, '', '']
+            update_time[topic[0]] = [topic[1], TOPIC_STATUS[0], '', '']
         return update_time
