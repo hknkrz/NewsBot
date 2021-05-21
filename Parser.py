@@ -3,7 +3,6 @@ import requests
 import sqlite3
 
 URL = 'https://interfax.ru'
-TOPIC_STATUS = (0, 1, 2)
 FIRST_10_PAGES = 10
 LINK_PREFIX = 12
 
@@ -39,10 +38,10 @@ def parse_stories():
                 if name in upd_time_dict.keys():
                     if upd_time_dict[name][0] != str(time):
                         upd_time_dict[name][0] = str(time)
-                        upd_time_dict[name][1] = TOPIC_STATUS[1]
+                        upd_time_dict[name][1] = False
                         upd_time_dict[name][2] = parse_topics(link, time)
 
-                    upd_time_dict[name] = [str(time), TOPIC_STATUS[2], parse_topics(link, None), link]
+                    upd_time_dict[name] = [str(time), None, parse_topics(link, None), link]
 
     update_db(upd_time_dict)
     return
@@ -55,23 +54,23 @@ def update_db(update_dict):
         cur.execute(
             """CREATE TABLE IF NOT EXISTS topics(topic_name PRIMARY KEY,upd_time TEXT,stories TEXT,link TEXT )""")
         for key in update_dict.keys():
+            # Если добавлен новый раздел
+            if update_dict[key][1] is None:
+                cur.execute("INSERT INTO topics VALUES (?,?,?,?)",
+                            (key, update_dict[key][0], update_dict[key][2], update_dict[key][3]))
+
             # Если данные в базе не устарели - переход на следующую итерацию
-            if update_dict[key][1] == TOPIC_STATUS[0]:
+            elif update_dict[key][1]:
                 continue
             # Если в присутствующий в базе раздел новостей добавлены новые статьи
-            elif update_dict[key][1] == TOPIC_STATUS[1]:
+            else:
                 for i in cur.execute(f"SELECT stories FROM topics WHERE topic_name = '{key}'"):
                     substr = i[0]
                 cur.execute(
                     f"UPDATE topics SET stories = {substr + update_dict[key][2]}")
                 cur.execute(
                     f"UPDATE topics SET upd_time = {substr + update_dict[key][0]}")
-            # Если добавлен новый раздел
-            else:
-                cur.execute("INSERT INTO topics VALUES (?,?,?,?)",
-                            (key, update_dict[key][0], update_dict[key][2], update_dict[key][3]))
 
-                pass
         conn.commit()
 
 
@@ -119,5 +118,5 @@ def create_upd_dict():
         conn.commit()
 
         for topic in cur.execute("SELECT topic_name,upd_time FROM topics"):
-            update_time[topic[0]] = [topic[1], TOPIC_STATUS[0], '', '']
+            update_time[topic[0]] = [topic[1], True, '', '']
         return update_time

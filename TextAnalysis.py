@@ -44,6 +44,3 @@ def popular_words(word_dict):
         if len(key[0]) > KEY_WORD_QUANTITY:
             words.append(key[0])
     return '\n'.join(words)
-
-
-word_counter('https://www.interfax.ru/moscow/767986')
