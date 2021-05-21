@@ -64,8 +64,8 @@ def update_db(update_dict):
                 continue
             # Если в присутствующий в базе раздел новостей добавлены новые статьи
             else:
-                for i in cur.execute(f"SELECT stories FROM topics WHERE topic_name = '{key}'"):
-                    substr = i[0]
+                for story in cur.execute(f"SELECT stories FROM topics WHERE topic_name = '{key}'"):
+                    substr = story[0]
                 cur.execute(
                     f"UPDATE topics SET stories = {substr + update_dict[key][2]}")
                 cur.execute(
