@@ -3,8 +3,8 @@ import requests
 import sqlite3
 
 URL = 'https://interfax.ru'
-FIRST_10_PAGES = 10
-LINK_PREFIX = 12
+OPTIMAL_PAGE_QUANTITY = 10
+LINK_PREFIX_SIZE = 12
 
 
 def parse_stories():
@@ -17,10 +17,10 @@ def parse_stories():
 
     page_board = soup.find('div', class_='allPNav')
     pages = page_board.find_all('a')
-    last_page = pages[len(pages) - 1]['href'][LINK_PREFIX:]
+    last_page = pages[len(pages) - 1]['href'][LINK_PREFIX_SIZE:]
     for page in range(1, int(last_page) + 1):
         # Парсинг 10 первых страниц
-        if page == FIRST_10_PAGES:
+        if page == OPTIMAL_PAGE_QUANTITY:
             break
         cur_url = URL + '/story/page_' + str(page)
         response = requests.get(cur_url)
