@@ -24,16 +24,14 @@ def re_parse():
 @bot.message_handler(content_types=['text'],
                      commands=['/new_docs', '/new_topics', '/topic', '/describe_doc', '/get_tags', '/words'])
 def get_text_messages(message):
-    command = message.text.split(' ', 1)
+    command = message.text.split(1)
     if command[0] == '/help':
-        bot.send_message(message.from_user.id, '/new_docs <N> - показать N самых свежих новостей')
-        bot.send_message(message.from_user.id, '/new_topics <N> - показать N самых свежих тем')
         bot.send_message(message.from_user.id,
-                         '/topic <topic_name> - показать описание темы и заголовки 5 самых свежих новостей в этой теме')
-        bot.send_message(message.from_user.id,
-                         '/describe_doc <link> - показать частоту слов и распределение слов по длинам')
-        bot.send_message(message.from_user.id, '/get_tags <link> - показать теги статьи')
-        bot.send_message(message.from_user.id, '/words <link> - показать ключевые слова к статье')
+                         '/new_docs <N> - показать N самых свежих новостей\n/new_topics <N> - показать N самых свежих '
+                         'тем\n/topic <topic_name> - показать описание темы и заголовки 5 самых свежих новостей в'
+                         ' этой теме\n/describe_doc <link> - показать частоту слов и распределение слов по длинам\n'
+                         '/get_tags <link> - показать теги статьи\n/words <link> - показать ключевые слова к статье'
+                         )
 
     elif command[0] in command_dict.keys():
         if len(command) != 2:
